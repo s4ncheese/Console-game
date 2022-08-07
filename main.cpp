@@ -38,6 +38,14 @@ struct Playing_field {
     void _set_size(unsigned n_rows, unsigned n_cols) {
         _n_rows = n_rows;
         _n_cols = n_cols;
+
+        _field = (char **) malloc(sizeof(char *) * _n_rows);
+        for (unsigned i_rows = 0; i_rows < _n_rows; i_rows++)
+            _field[i_rows] = (char *) malloc(sizeof(char) * _n_cols);
+
+        for (unsigned i_row = 0; i_row < _n_rows; i_row++)
+            for (unsigned i_col = 0; i_col < _n_cols; i_col++)
+                _field[i_row][i_col] = '.';
     }
 
     unsigned _get_rows(){
@@ -55,7 +63,9 @@ struct Playing_field {
         for (unsigned i_col = 0; i_col < _n_cols + 1; i_col++) {
             if (!i_col) {
                 std::cout << 0 << "  ";
-            } else {
+            } else if (i_col < 9) {
+                std::cout << 0 + i_col << ' ' << ' ';
+            }else {
                 std::cout << 0 + i_col << ' ';
             }
         }
@@ -68,9 +78,11 @@ struct Playing_field {
                 std::cout << 1 + i_row << ' ';
             }
             for (unsigned i_col = 0; i_col < n_cols; i_col++)
-                if (i_col < 9) {
+                if (i_col < 8) {
+                    std::cout << _field[i_row][i_col] << ' ' << ' ';
+                } else if (i_col == 8){
                     std::cout << _field[i_row][i_col] << ' ';
-                } else {
+                }else {
                     std::cout << ' ' << _field[i_row][i_col] << ' ';
                 }
             std::cout << '\n';
@@ -98,6 +110,14 @@ public:
     }
 };
 
+void get_change(unsigned min, unsigned max, unsigned &change) {
+    std::cin >> change;
+    while (change < min || change > max) {
+        std::cerr << "Неверное значение! Попробуйте ещё раз >>>\n";
+        std::cin >> change;
+    }
+}
+
 int main() {
     SetConsoleOutputCP(CP_UTF8);
     srand(time(NULL));
@@ -107,7 +127,7 @@ int main() {
                  "\t\t 2. Правила \n";
 
     unsigned user_change;
-    std::cin >> user_change;
+    get_change(1, 2, user_change);
 
     if (user_change == 2) {
         std::cout << "\t\t\t ПРАВИЛА \n"
@@ -125,43 +145,27 @@ int main() {
                      "\t 7. Побеждает тот, чья территория больше\n\n"
                      "Вернуться в главное меню? \n"
                      "1. Да \n";
-        std::cin >> user_change;
+        get_change(1, 1, user_change);
+        goto menu;
 
-        if (user_change == 1)
-            goto menu;
-        else {
-            while (user_change != 1) {
-                std::cerr << "Неверное значение!!! Попробуйте ещё раз >>>";
-                std::cin >> user_change;
-            }
-            goto menu;
-        }
     } else if (user_change == 1) {
         std::cout << "Выберите режим игры:\n"
                      "1. Против ИИ\n"
                      "2. Против игрока\n";
 
-        std::cin >> user_change;
-        while (user_change != 1 && user_change != 2) {
-            std::cerr << "Неверное значение!!! Попробуйте ещё раз >>> \n";
-            std::cin >> user_change;
-        }
+        get_change(1, 2, user_change);
         if (user_change == 1) {
 
         } else {
-
+            change_size:
             std::cout << "Укажите размер игрового поля: \n"
                          "1. Маленькое (20 x 20) \n"
                          "2. Среднее (30 x 30) \n"
-                         "3. Большое (40 x 40) \n";
+                         "3. Большое (39 x 39) \n"
+                         "4. Вернуться в меню\n";
 
             unsigned size;
-            std::cin >> size;
-
-            while (size < 1 || size > 3) {
-                std::cerr << "Неверное значение!!! Попробуйте ещё раз >>>\n";
-                std::cin >> size;
-            }
+            get_change(1, 4, size);
 
             Playing_field field;
             switch (size) {
@@ -174,7 +178,11 @@ int main() {
                     break;
                 }
                 case 3: {
-                    field._set_size(40, 40);
+                    field._set_size(39, 39);
+                }
+                case 4: {
+                    goto menu;
+                    break;
                 }
             }
 
@@ -182,13 +190,18 @@ int main() {
                          "1. Да\n"
                          "2. Нет\n";
 
-            std::cin >> user_change;
-            while (user_change != 1 && user_change != 2) {
-                std::cerr << "Неверное значение!!! Попробуйте ещё раз >>>\n";
-                std::cin >> user_change;
-            }
+            get_change(1, 2, user_change);
 
-            field.print_field();
+            if (user_change == 1) {
+                std::cout << "\t\t\tУдачной игры!!!!\n";
+                field.print_field();
+            } else {
+                std::cout << "Вернуться к выбору размера игрового поля? \n"
+                             "1. Да\n"
+                             "2. Нет\n";
+            }
+            get_change(1, 2, user_change);
+            if (user_change == 1) goto change_size;
         }
     }
 
