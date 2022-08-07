@@ -1,0 +1,3 @@
+C:/Projects/CLionProjects/Square_game/cmake-build-debug/CMakeFiles/Square_game.dir
+C:/Projects/CLionProjects/Square_game/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Projects/CLionProjects/Square_game/cmake-build-debug/CMakeFiles/rebuild_cache.dir
