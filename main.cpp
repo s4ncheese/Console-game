@@ -1,9 +1,8 @@
 #include <iostream>
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
 #include <windows.h>
 #include <ctime>
-#include <vector>
 #include <algorithm>
 
 #define MIN_SIZE 21
@@ -48,11 +47,11 @@ struct Playing_field {
                 _field[i_row][i_col] = '.';
     }
 
-    unsigned _get_rows(){
+    unsigned _get_rows() const {
         return _n_rows;
     }
 
-    unsigned _get_cols(){
+    unsigned _get_cols() const {
         return _n_cols;
     }
 
@@ -65,7 +64,7 @@ struct Playing_field {
                 std::cout << 0 << "  ";
             } else if (i_col < 9) {
                 std::cout << 0 + i_col << ' ' << ' ';
-            }else {
+            } else {
                 std::cout << 0 + i_col << ' ';
             }
         }
@@ -80,9 +79,9 @@ struct Playing_field {
             for (unsigned i_col = 0; i_col < n_cols; i_col++)
                 if (i_col < 8) {
                     std::cout << _field[i_row][i_col] << ' ' << ' ';
-                } else if (i_col == 8){
+                } else if (i_col == 8) {
                     std::cout << _field[i_row][i_col] << ' ';
-                }else {
+                } else {
                     std::cout << ' ' << _field[i_row][i_col] << ' ';
                 }
             std::cout << '\n';
@@ -108,15 +107,20 @@ public:
     void get_numbers() const {
         std::cout << first_cube << ' ' << second_cube << '\n';
     }
+
+    unsigned get_sum() const {
+        return first_cube + second_cube;
+    }
 };
 
-void get_change(unsigned min, unsigned max, unsigned &change) {
+void get_choice(unsigned min, unsigned max, unsigned &change) {
     std::cin >> change;
     while (change < min || change > max) {
         std::cerr << "Неверное значение! Попробуйте ещё раз >>>\n";
         std::cin >> change;
     }
 }
+
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);
@@ -126,10 +130,10 @@ int main() {
                  "\t\t 1. Играть \n"
                  "\t\t 2. Правила \n";
 
-    unsigned user_change;
-    get_change(1, 2, user_change);
+    unsigned user_choice;
+    get_choice(1, 2, user_choice);
 
-    if (user_change == 2) {
+    if (user_choice == 2) {
         std::cout << "\t\t\t ПРАВИЛА \n"
                      "\t 1. Сгенерируйте два случайных числа\n"
                      "\t 2. Сделайте прямоугольник со сторонами, равными \n "
@@ -145,19 +149,19 @@ int main() {
                      "\t 7. Побеждает тот, чья территория больше\n\n"
                      "Вернуться в главное меню? \n"
                      "1. Да \n";
-        get_change(1, 1, user_change);
+        get_choice(1, 1, user_choice);
         goto menu;
 
-    } else if (user_change == 1) {
+    } else if (user_choice == 1) {
         std::cout << "Выберите режим игры:\n"
                      "1. Против ИИ\n"
                      "2. Против игрока\n";
 
-        get_change(1, 2, user_change);
-        if (user_change == 1) {
+        get_choice(1, 2, user_choice);
+        if (user_choice == 1) {
 
         } else {
-            change_size:
+            choice_size:
             std::cout << "Укажите размер игрового поля: \n"
                          "1. Маленькое (20 x 20) \n"
                          "2. Среднее (30 x 30) \n"
@@ -165,7 +169,7 @@ int main() {
                          "4. Вернуться в меню\n";
 
             unsigned size;
-            get_change(1, 4, size);
+            get_choice(1, 4, size);
 
             Playing_field field;
             switch (size) {
@@ -180,28 +184,60 @@ int main() {
                 case 3: {
                     field._set_size(39, 39);
                 }
-                case 4: {
+                case 4:
                     goto menu;
-                    break;
-                }
             }
 
             std::cout << "Поле создано. Начать игру? \n"
                          "1. Да\n"
                          "2. Нет\n";
 
-            get_change(1, 2, user_change);
+            get_choice(1, 2, user_choice);
 
-            if (user_change == 1) {
-                std::cout << "\t\t\tУдачной игры!!!!\n";
-                field.print_field();
-            } else {
+            if (user_choice == 2) {
                 std::cout << "Вернуться к выбору размера игрового поля? \n"
                              "1. Да\n"
                              "2. Нет\n";
+
+                get_choice(1, 2, user_choice);
+                if (user_choice == 1) goto choice_size;
+            } else {
+                std::cout << "\t\t\tУдачной игры!!!!\n";
+
+                std::cout << "Игрок 1, введите число от 2 до 12 >>>\n";
+                get_choice(2, 12, user_choice);
+                unsigned player1_number = user_choice;
+
+                std::cout << "Игрок 2, введите число от 2 до 12 >>>\n";
+                get_choice(2, 12, user_choice);
+                unsigned player2_number = user_choice;
+
+                Cubes first_step;
+                first_step.roll_the_dice();
+                unsigned sum_numbers = first_step.get_sum();
+                std::cout << "Выпало: " << sum_numbers << '\n';
+
+                unsigned res1 = sum_numbers - player1_number;
+                unsigned res2 = sum_numbers - player2_number;
+
+                if (res1 < res2) {
+                    goto player1_step;
+                } else {
+                    goto player2_step;
+                }
+
+                player1_step:
+                std::cout << "Ход игрока 1. \n"
+                             "1. Бросить кубики\n"
+                             "2. Сдаться\n";
+                get_choice(1, 2, user_choice);
+
+                player2_step:
+                std::cout << "Ход игрока 2. \n"
+                             "1. Бросить кубики\n"
+                             "2. Сдаться\n";
+                get_choice(1, 2, user_choice);
             }
-            get_change(1, 2, user_change);
-            if (user_change == 1) goto change_size;
         }
     }
 
